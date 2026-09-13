@@ -1,0 +1,12 @@
+# Copy to dbt/profiles.yml (git-ignored) or ~/.dbt/profiles.yml.
+vancouver_open_data:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth            # gcloud auth application-default login
+      project: "{{ env_var('GCP_PROJECT') }}"
+      dataset: "{{ env_var('DBT_SCHEMA', 'vancouver') }}"
+      location: "{{ env_var('BQ_LOCATION', 'EU') }}"
+      threads: 4
+      priority: interactive

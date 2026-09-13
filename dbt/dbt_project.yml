@@ -1,0 +1,64 @@
+name: vancouver_open_data
+version: "0.1.0"
+config-version: 2
+profile: vancouver_open_data
+
+model-paths: ["models"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+clean-targets: ["target", "dbt_packages"]
+
+# raw (loaded by pipeline/) → staging (views, typed) → analytics/core (row-level
+# tables) → marts (rollups the outputs read). Each model sets its own schema.
+models:
+  vancouver_open_data:
+    staging:
+      +materialized: view
+      +tags: ["staging"]
+    core:
+      +materialized: table
+      +tags: ["core"]
+    marts:
+      +materialized: table
+      +tags: ["marts"]
+
+seeds:
+  vancouver_open_data:
+    +schema: ca_seeds
+    # City population — Statistics Canada 2021 Census Profile.
+    seed_ca_vancouver_population:
+      +column_types:
+        year: INT64
+        population: INT64
+        geography: STRING
+        dguid: STRING
+        source: STRING
+        source_url: STRING
+    # Statements of Financial Information fetched from the Internet Archive
+    # (pipeline/finance/fetch_sofi.py writes it): capture, URLs, SHA-256.
+    seed_ca_vancouver_sofi_documents:
+      +column_types:
+        fiscal_year: INT64
+        part: STRING
+        wayback_timestamp: STRING
+        original_url: STRING
+        wayback_url: STRING
+        file: STRING
+        bytes: INT64
+        sha256: STRING
+    # Schedule totals the parsed rows do not reproduce, with what was measured.
+    seed_ca_vancouver_sofi_known_gaps:
+      +column_types:
+        fiscal_year: INT64
+        schedule: STRING
+        category: STRING
+        reason: STRING
+    # Five-year-review rows a later report misprints, with the proof.
+    seed_ca_vancouver_sofi_review_misprints:
+      +column_types:
+        report_year: INT64
+        table_name: STRING
+        fiscal_year_from: INT64
+        fiscal_year_to: INT64
+        evidence: STRING

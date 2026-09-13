@@ -1,0 +1,17 @@
+# downloaded sources and generated outputs — never committed
+cache/
+outputs/
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/profiles.yml
+# python
+__pycache__/
+*.pyc
+.venv/
+# secrets
+.env
+credentials*.json
+*.key.json
+.DS_Store
