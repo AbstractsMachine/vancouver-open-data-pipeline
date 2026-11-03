@@ -55,3 +55,47 @@ def test_a_person_with_a_legal_form_is_a_firm() -> None:
 )
 def test_amounts_read_as_printed(text: str, value: int) -> None:
     assert amount(text) == value
+
+
+SUPPLIER_PAGE = "\n".join(
+    [
+        "SCHEDULE OF PAYMENTS TO SUPPLIERS OF GOODS AND SERVICES",
+        "Name                                 Amount     Name                                  Amount",
+        "Acme Paving Ltd                     125,000     Bell Canada                           30,500",
+        "Northern Very Long Construction                 Smith, John                           26,000",
+        "  Holdings Inc                       45,000     Sarah Bell                            27,100",
+        "Zed Supply Co                        40,000     Vendors > $25,000              $    293,600",
+    ]
+)
+
+
+def test_a_two_column_supplier_page_reads_every_row_and_its_control_total() -> None:
+    from parse_sofi import parse_supplier_pages
+
+    rows, controls, unread = parse_supplier_pages([SUPPLIER_PAGE], 2020)
+    assert [(r["name"], r["amount_cad"], r["is_individual"]) for r in rows] == [
+        ("Acme Paving Ltd", 125000, False),
+        ("Bell Canada", 30500, False),
+        ("Smith, John", 26000, True),
+        ("Northern Very Long Construction Holdings Inc", 45000, False),
+        ("Sarah Bell", 27100, True),
+        ("Zed Supply Co", 40000, False),
+    ]
+    assert [(c["label"], c["amount_cad"]) for c in controls] == [("Vendors > $25,000", 293600)]
+    assert sum(r["amount_cad"] for r in rows) == controls[0]["amount_cad"]
+    assert unread == []
+
+
+def test_an_amount_the_pdf_cut_short_is_kept_unread_not_guessed() -> None:
+    from parse_sofi import read_pairs
+
+    assert read_pairs(["Aramark Canada Ltd        ,541,678"], grouped=True) == [
+        ("Aramark Canada Ltd", None, False, ",541,678")
+    ]
+
+
+def test_a_page_that_is_not_the_citys_supplier_schedule_is_skipped() -> None:
+    from parse_sofi import parse_supplier_pages
+
+    library = SUPPLIER_PAGE.replace("SCHEDULE OF PAYMENTS", "PUBLIC LIBRARY BOARD SCHEDULE OF PAYMENTS")
+    assert parse_supplier_pages([library], 2020) == ([], [], [])
