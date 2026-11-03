@@ -52,7 +52,8 @@ make export                   # JSON in outputs/
 
 ## Checks
 
-`dbt build` runs the data tests. Beyond keys and accepted values, they check:
+`make test` runs the unit tests of the parsers and of the payee rule, offline; CI runs them, compiles every
+script and parses the dbt project on every push. `dbt build` runs the data tests. Beyond keys and accepted values, they check:
 
 - every section of the five-year review adds up to the total printed under it, and revenue − expenses equals the printed surplus;
 - expenses by object and by function have the same total every year; the debt table's own arithmetic holds;

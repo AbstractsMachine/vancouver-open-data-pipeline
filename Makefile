@@ -1,10 +1,15 @@
 # Vancouver open-data pipeline. Copy .env.example to .env first.
 PY ?= python3
 
-.PHONY: install sync sofi-fetch sofi-parse review heights council dbt-deps dbt seed build export all
+.PHONY: install test sync sofi-fetch sofi-parse review heights council dbt-deps dbt seed build export all
 
 install:
 	$(PY) -m pip install -r requirements.txt
+
+## offline checks: the parsers and the payee rule (no cloud access)
+test:
+	$(PY) -m pip install -q -r requirements-dev.txt
+	$(PY) -m pytest -q
 
 ## 1. ingest — the City's open-data portal (every source in config/vancouver.yaml)
 sync:

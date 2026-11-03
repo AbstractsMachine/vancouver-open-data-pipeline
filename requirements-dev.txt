@@ -1,0 +1,3 @@
+# Offline checks (CI and `make test`): no cloud access needed.
+pytest==9.1.1
+pytest-cov==7.1.0

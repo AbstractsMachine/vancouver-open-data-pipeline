@@ -91,13 +91,33 @@ def amount(tok: str) -> int:
     return -v if neg else v
 
 
+# Marker words that are also common surnames ("Sarah Bell", "Jiwon Park", "Kevin Law"). Alone at the end of a name
+# shaped like "Given [I.] Surname" they mark a person, not a firm; "Bell Canada" or "Park Board" keep their other marker.
+SURNAME_MARKERS = frozenset(
+    "bell rogers shaw ford park parks law house home homes glass power rock fire market water car care fleet steel inn "
+    "gas oil store shop press news music film dance plan fund apple kitchen paint tools parts data fuel rent lease sales".split()
+)
+GIVEN_SURNAME = re.compile(r"^[A-Z][a-z'\-]+(?: [A-Z]\.?| [A-Z][a-z'\-]+)? ([A-Z][a-z'\-]+)$")
+
+
+def _surname_only_marker(name: str) -> bool:
+    """The name is shaped like "Given [I.] Surname" and its only organisation marker is that surname."""
+    shape = GIVEN_SURNAME.match(name)
+    if not shape or shape.group(1).lower() not in SURNAME_MARKERS:
+        return False
+    return ORG.search(name[: shape.start(1)]) is None
+
+
 def is_individual(name: str) -> bool:
     """CONSERVATIVE: a payee is published by name only when the name carries an
     organisation marker (a legal form, a kind of body, a trade word) or a digit.
     Everything else — "Surname, Given", "Given Surname", or a trade name with
-    no marker — is treated as possibly a person and kept out of every export."""
+    no marker — is treated as possibly a person and kept out of every export.
+    A marker that is also a common surname ("Sarah Bell") does not count."""
     n = name.strip()
     if PERSON.search(n) and not re.search(r"\b(ltd|inc|corp|llp|law corporation|in trust|society|association)\b", n, re.I):
+        return True
+    if _surname_only_marker(n):
         return True
     if re.search(r"\d", n) or ORG.search(n):
         return False
