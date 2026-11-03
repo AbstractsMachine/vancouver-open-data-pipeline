@@ -17,7 +17,22 @@ recorded with its URL.
 | Statements of Financial Information 2011–2025 (PDF) | payments to suppliers over $25,000, grants, the five-year statistical review (revenue, expenses, debt, reserves, balance sheet) | Internet Archive copies (vancouver.ca refuses scripted requests); parsed from the PDF text |
 | [NRCan HRDEM](https://open.canada.ca/data/en/dataset/957782bf-847c-4644-a757-e383c0057995) | 1 m LiDAR surface and terrain models (2016) | windowed reads of cloud-optimised GeoTIFFs, to measure building heights |
 
-Licences: City data — [Open Government Licence – Vancouver](https://opendata.vancouver.ca/pages/licence/); NRCan data — Open Government Licence – Canada. The code in this repository is under the GNU Affero General Public License v3.0 (AGPL-3.0-only); see [LICENSE](LICENSE).
+Code: AGPL-3.0, data: the publishers' open licences ([Open Government Licence – Vancouver](https://opendata.vancouver.ca/pages/licence/) for City data, Open Government Licence – Canada for NRCan data). The code is under the GNU Affero General Public License v3.0 (AGPL-3.0-only); see [LICENSE](LICENSE).
+
+## How it fits together
+
+```
+opendata.vancouver.ca ───▶ pipeline/sync/    ──┐
+SOFI PDFs (archive.org) ─▶ pipeline/finance/ ──┼──▶ BigQuery raw tables
+NRCan LiDAR ─────────────▶ pipeline/city/    ──┘          │
+                                                          ▼
+          dbt/: staging ──▶ analytics ──▶ marts ──▶ pipeline/export/ ──▶ outputs/*.json
+          dbt tests: every schedule adds up to its printed total; no withheld name reaches a mart
+```
+
+Each step reads the tables or files earlier steps wrote, so any one can be re-run on its own. The parsers keep every amount
+and check each schedule against the total the City printed; the payee rule decides which names may leave the warehouse
+(see Privacy).
 
 ## Layout
 
@@ -31,6 +46,7 @@ pipeline/
   export/                  marts → JSON files in outputs/
 dbt/                       staging → analytics (row-level) → marts (rollups), seeds, tests
 docs/data-notes.md         what the sources are really like, and the rule followed for each finding
+tests/                     offline unit tests: the PDF parsers and the payee rule (`make test`)
 reports/                   weekly progress reports
 ```
 
