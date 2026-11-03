@@ -17,7 +17,7 @@ recorded with its URL.
 | Statements of Financial Information 2011–2025 (PDF) | payments to suppliers over $25,000, grants, the five-year statistical review (revenue, expenses, debt, reserves, balance sheet) | Internet Archive copies (vancouver.ca refuses scripted requests); parsed from the PDF text |
 | [NRCan HRDEM](https://open.canada.ca/data/en/dataset/957782bf-847c-4644-a757-e383c0057995) | 1 m LiDAR surface and terrain models (2016) | windowed reads of cloud-optimised GeoTIFFs, to measure building heights |
 
-Licences: City data — [Open Government Licence – Vancouver](https://opendata.vancouver.ca/pages/licence/); NRCan data — Open Government Licence – Canada. The code in this repository is MIT-licensed.
+Licences: City data — [Open Government Licence – Vancouver](https://opendata.vancouver.ca/pages/licence/); NRCan data — Open Government Licence – Canada. The code in this repository is under the GNU Affero General Public License v3.0 (AGPL-3.0-only); see [LICENSE](LICENSE).
 
 ## Layout
 
