@@ -19,7 +19,17 @@ def test_names_shaped_like_a_person_are_withheld(name: str) -> None:
 
 @pytest.mark.parametrize(
     "name",
-    ["Jiwon Park", "Sarah Bell", "Kevin Law", "John Shaw", "Mary Rogers", "David Ford", "Tom House", "Lee Power", "Ann J. Glass"],
+    [
+        "Jiwon Park",
+        "Sarah Bell",
+        "Kevin Law",
+        "John Shaw",
+        "Mary Rogers",
+        "David Ford",
+        "Tom House",
+        "Lee Power",
+        "Ann J. Glass",
+    ],
 )
 def test_a_surname_that_is_also_a_marker_word_does_not_publish_a_person(name: str) -> None:
     assert is_individual(name)
