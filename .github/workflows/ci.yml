@@ -1,0 +1,51 @@
+name: ci
+
+# Offline checks, with no cloud credentials: unit tests of the parsers and the payee rule, every script compiles,
+# and the dbt project parses (every ref and source resolves). `dbt build` needs BigQuery and runs in your project.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Unit tests
+        run: python -m pytest -q --cov=pipeline --cov-report=term
+      - name: Scripts compile
+        run: python -m compileall -q pipeline
+
+  dbt-parse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: dbt
+    env:
+      DBT_PROFILES_DIR: .
+      GCP_PROJECT: placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dbt (pinned)
+        run: pip install "dbt-core==1.12.6" "dbt-bigquery==1.12.1"
+      - run: cp profiles.yml.example profiles.yml
+      - run: dbt deps
+      - name: dbt parse
+        run: dbt parse
